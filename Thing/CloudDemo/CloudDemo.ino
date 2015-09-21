@@ -18,8 +18,8 @@
 #define LCD_PIN           V9
 
 // WiFi parameters
-const char WIFI_SSID[] = "sparkfun-guest";
-const char WIFI_PSK[] = "sparkfun6333";
+const char WIFI_SSID[] = "EsperNet"; //"sparkfun-guest";
+const char WIFI_PSK[] = "EsperNetKey"; //"sparkfun6333";
 const char BLYNK_AUTH[] = "b8960ce24e324ce9ade3490034bf6215";
 
 // Other constants

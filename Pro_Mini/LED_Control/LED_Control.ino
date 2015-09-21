@@ -24,6 +24,7 @@ const int IN_BUF_MAX = 7;         // bytes
 const byte SERIAL_SOF = 0xA5;
 const byte SERIAL_EOF = 0x5A;
 const int TIMEOUT = 100;          // ms
+const int DISCO_DELAY = 85;       // ms
 const byte COMM_RGB = 1;
 const byte COMM_DISCO = 2;
 const byte COMM_BLUE_SKY = 3;
@@ -45,8 +46,13 @@ NightState night_state;
 int night_i;
 int storm_state;
 int storm_delay;
+int disco_state;
+int disco_delay;
 byte in_msg[IN_BUF_MAX];
 uint8_t bytes_received;
+uint8_t color_r;
+uint8_t color_g;
+uint8_t color_b;
 
 /****************************************************************
  * Setup
@@ -66,8 +72,13 @@ void setup() {
   led_time = millis();
   led_state = LED_DISCO;
   storm_state = 0;
+  disco_state = 0;
+  disco_delay = DISCO_DELAY;
   night_state = NIGHT_0;
   night_i = 1;
+  color_r = 0;
+  color_g = 0;
+  color_b = 0;
   
   // Set initial random delay
   pinMode(A0, INPUT);
@@ -95,6 +106,10 @@ void loop() {
     switch ( in_msg[0] ) {
       case COMM_RGB:
         led_state = LED_RGB;
+        color_r = in_msg[1];
+        color_g = in_msg[2];
+        color_b = in_msg[3];
+        rgb(color_r, color_g, color_b);
         break;
       case COMM_DISCO:
         led_state = LED_DISCO;
@@ -191,10 +206,17 @@ uint8_t receiveMessage(byte msg[], unsigned long timeout) {
 // Update LED strips
 void doLED() {
   
-  //***TODO*** Add RGB and Disco modes
-  
   // Display LEDs based on the current weather
   switch ( led_state ) {
+
+    // RGB
+    case LED_RGB:
+      break;
+
+    // Disco
+    case LED_DISCO:
+      disco();
+      break;
     
     // Blue sky
     case LED_BLUE_SKY:
@@ -233,6 +255,318 @@ void doLED() {
   }
 }
 
+// Display static RGB value
+void rgb(uint8_t r, uint8_t g, uint8_t b) {
+#if DEBUG
+  Serial.print("RGB: ");
+  Serial.print(r);
+  Serial.print(",");
+  Serial.print(g);
+  Serial.print(",");
+  Serial.print(b);
+#endif
+  for ( int i = 0; i < 300; i++ ) {
+    strip_a.setPixelColor(i, r, g, b);
+    strip_b.setPixelColor(i, r, g, b);
+  }
+  strip_a.show();
+  strip_b.show();
+}
+
+/****************************************************************
+ * LED Strip - Disco Functions
+ ***************************************************************/
+void disco() {
+
+  int i;
+  int red;
+  int green;
+  int blue;
+
+#if DEBUG
+  Serial.print("Disco: ");
+  Serial.println(disco_state);
+#endif
+  
+  if ( (millis() - led_time) >= disco_delay ) {
+    switch ( disco_state ) {
+
+      case 0:
+        red = random(150);
+        green = random(250);
+        blue = random(200);
+        for (i = 0; i < 50; i++){
+          strip_a.setPixelColor(i, red, green, blue);
+        }
+        strip_a.show();
+        break;
+
+      case 1:
+        for (i = 0; i < 300; i++){
+          strip_a.setPixelColor(i, 0, 0, 0);
+        }
+        strip_a.show();
+        break;
+
+      case 2:
+        red = random(250);
+        green = random(100);
+        blue = random(200);
+        for (i = 200; i < 300; i++){
+          strip_b.setPixelColor(i, red, green, blue);
+        }
+        strip_b.show();
+        break;
+  
+      case 3:
+        red = random(250);
+        green = random(250);
+        blue = random(250);
+        for (i = 200; i < 300; i++){
+          strip_b.setPixelColor(i, red, green, blue);
+        }
+        strip_b.show();
+        break;
+
+      case 4:
+        for (i = 0; i < 300; i++){
+          strip_b.setPixelColor(i, 0, 0, 0);
+        }
+        strip_b.show();
+        break;
+
+      case 5:
+        red = random(250);
+        green = random(250);
+        blue = random(250);
+        for (i = 200; i < 300; i++){
+          strip_a.setPixelColor(i, red, green, blue);
+        }
+        strip_a.show();
+        break;
+
+      case 6:
+        for (i = 0; i < 300; i++){
+          strip_a.setPixelColor(i, 0, 0, 0);
+        }
+        strip_a.show();
+        break;
+  
+      case 7:
+        red = random(250);
+        green = random(250);
+        blue = random(250);
+        for (i = 60; i < 110; i++){
+          strip_a.setPixelColor(i, red, green, blue);
+        }
+        strip_a.show();
+        break;
+
+      case 8:
+        for (i = 0; i < 300; i++){
+          strip_a.setPixelColor(i, 0, 0, 0);
+        }
+        strip_a.show();
+        break;
+  
+      case 9:
+        red = random(250);
+        green = random(250);
+        blue = random(250);
+        for (i = 0; i < 110; i++){
+          strip_b.setPixelColor(i, red, green, blue);
+        }
+        strip_b.show();
+        break;
+
+      case 10:
+        for (i = 0; i < 300; i++){
+          strip_b.setPixelColor(i, 0, 0, 0);
+        }
+        strip_b.show();
+        break;
+  
+      case 11:
+        red = random(200);
+        green = random(200);
+        blue = random(200);
+        for (i = 125; i < 175; i++){
+          strip_a.setPixelColor(i, red, green, blue);
+        }
+        strip_a.show();
+        break;
+
+      case 12:
+        for (i = 0; i < 300; i++){
+          strip_a.setPixelColor(i, 0, 0, 0);
+        }
+        strip_a.show();
+        break;
+  
+      case 13:
+        red = random(200);
+        green = random(200);
+        blue = random(200);
+        for (i = 125; i < 175; i++){
+          strip_b.setPixelColor(i, red, green, blue);
+        }
+        strip_b.show();
+        break;
+
+      case 14:
+        for (i = 0; i < 300; i++){
+          strip_b.setPixelColor(i, 0, 0, 0);
+        }
+        strip_b.show();
+        break;
+  
+      case 15:
+        red = random(200);
+        green = random(200);
+        blue = random(200);
+        for (i = 200; i < 300; i++){
+          strip_a.setPixelColor(i, red, green, blue);
+        }
+        strip_a.show();
+        break;
+
+      case 16:
+        for (i = 0; i < 300; i++){
+          strip_a.setPixelColor(i, 0, 0, 0);
+        }
+        strip_a.show();
+        break;
+  
+      case 17:
+        red = random(200);
+        green = random(200);
+        blue = random(200);
+        for (i = 0; i < 110; i++){
+          strip_a.setPixelColor(i, red, green, blue);
+        }
+        strip_a.show();
+        break;
+
+      case 18:
+        for (i = 0; i < 300; i++){
+          strip_a.setPixelColor(i, 0, 0, 0);
+        }
+        strip_a.show();
+        break;
+
+      case 19:
+        red = random(200);
+        green = random(200);
+        blue = random(200);
+        for (i = 200; i < 300; i++){
+          strip_b.setPixelColor(i, red, green, blue);
+        }
+        strip_b.show();
+        break;
+
+      case 20:
+        for (i = 0; i < 300; i++){
+          strip_b.setPixelColor(i, 0, 0, 0);
+        }
+        strip_b.show();
+        break;
+
+      case 21:
+        red = random(200);
+        green = random(200);
+        blue = random(200);
+        for (i = 60; i < 110; i++){
+          strip_a.setPixelColor(i, red, green, blue);
+        }
+        strip_a.show();
+        break;
+
+      case 22:
+        for (i = 0; i < 300; i++){
+          strip_a.setPixelColor(i, 0, 0, 0);
+        }
+        strip_a.show();
+        break;
+
+      case 23:
+        red = random(200);
+        green = random(200);
+        blue = random(200);
+        for (i = 0; i < 50; i++){
+          strip_a.setPixelColor(i, red, green, blue);
+        }
+        strip_a.show();
+        break;
+
+      case 24:
+        for (i = 0; i < 300; i++){
+          strip_a.setPixelColor(i, 0, 0, 0);
+        }
+        strip_a.show();
+        break;
+
+      case 25:
+        red = random(200);
+        green = random(200);
+        blue = random(200);
+        for (i = 60; i < 110; i++){
+          strip_b.setPixelColor(i, red, green, blue);
+        }
+        strip_b.show();
+        break;
+
+      case 26:
+        for (i = 0; i < 300; i++){
+          strip_b.setPixelColor(i, 0, 0, 0);
+        }
+        strip_b.show();
+        break;
+
+      case 27:
+        red = random(200);
+        green = random(200);
+        blue = random(200);
+        for (i = 125; i < 175; i++){
+        strip_a.setPixelColor(i, red, green, blue);
+        }
+        strip_a.show();
+        break;
+
+      case 28:
+        for (i = 0; i < 300; i++){
+          strip_a.setPixelColor(i, 0, 0, 0);
+        }
+        strip_a.show();
+        break;
+  
+      case 29:
+        red = random(200);
+        green = random(200);
+        blue = random(200);
+        for (i = 125; i < 175; i++){
+        strip_b.setPixelColor(i, red, green, blue);
+        }
+        strip_b.show();
+        break;
+
+      case 30:
+        for (i = 0; i < 300; i++){
+          strip_b.setPixelColor(i, 0, 0, 0);
+        }
+        strip_b.show();
+        break;
+
+      default:
+        disco_state = 0;
+        break;
+    }
+  }
+
+  disco_state = (disco_state + 1) % 31;
+  disco_delay = DISCO_DELAY;
+  led_time = millis();
+}
+
 /****************************************************************
  * LED Strip - Weather Functions
  ***************************************************************/
@@ -258,18 +592,18 @@ uint32_t wheel(byte WheelPos) {
 // Clear cloud function:
 void clearCloud(){
   for (int i = 0; i < 300; i++){ //for all the LEDs
-      strip_a.setPixelColor(i, 0, 0, 0); //turn off in cloud one
-      strip_b.setPixelColor(i, 0, 0, 0); //turn off in cloud two
-      }
-      strip_a.show(); //show what was set in cloud one
-      strip_b.show(); //show what was set in cloud two
+    strip_a.setPixelColor(i, 0, 0, 0); //turn off in cloud one
+    strip_b.setPixelColor(i, 0, 0, 0); //turn off in cloud two
+  }
+  strip_a.show(); //show what was set in cloud one
+  strip_b.show(); //show what was set in cloud two
 }
 
 // Bluesky function
 void blueSky() {
   for(int i=0; i<300; i++) {    //for all of the LEDs 
-            strip_a.setPixelColor(i, 0, 170, 175);   //set LEDs a sky blue color in cloud one
-            strip_b.setPixelColor(i, 0, 170, 175);   //set LEDs a sky blue color in cloud two
+    strip_a.setPixelColor(i, 0, 170, 175);   //set LEDs a sky blue color in cloud one
+    strip_b.setPixelColor(i, 0, 170, 175);   //set LEDs a sky blue color in cloud two
   }
   strip_a.show();
   strip_b.show();
@@ -278,8 +612,8 @@ void blueSky() {
 // White clouds function
 void whiteClouds() {
   for(int i=0; i<300; i++) {   //for all of the LEDs 
-              strip_a.setPixelColor(i, 100, 100, 100);  //set LEDs white-ish in cloud one
-              strip_b.setPixelColor(i, 100, 100, 100);  //set LEDs white-ish in cloud one
+    strip_a.setPixelColor(i, 100, 100, 100);  //set LEDs white-ish in cloud one
+    strip_b.setPixelColor(i, 100, 100, 100);  //set LEDs white-ish in cloud one
   }
   strip_a.show();
   strip_b.show();

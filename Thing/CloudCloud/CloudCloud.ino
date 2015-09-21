@@ -7,9 +7,6 @@
  * definitions below.
  */
 
-// Debug
-#define DEBUG    1
-
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 #include "States.h"
@@ -31,9 +28,22 @@
 #define LCD_PIN           V9
 
 // WiFi parameters
-const char WIFI_SSID[] = "sparkfun-guest";
-const char WIFI_PSK[] = "sparkfun6333";
+const char WIFI_SSID[] = "EsperNet"; //"sparkfun-guest";
+const char WIFI_PSK[] = "EsperNetKey"; //"sparkfun6333";
 const char BLYNK_AUTH[] = "b8960ce24e324ce9ade3490034bf6215";
+
+// Other constants
+const byte SERIAL_SOF = 0xA5;
+const byte SERIAL_EOF = 0x5A;
+const int OUT_BUF_MAX = 7;         // bytes
+const byte COMM_RGB = 1;
+const byte COMM_DISCO = 2;
+const byte COMM_BLUE_SKY = 3;
+const byte COMM_NIGHT = 4;
+const byte COMM_OVERCAST = 5;
+const byte COMM_GOLDEN = 6;
+const byte COMM_SNOW = 7;
+const byte COMM_LIGHTNING = 8;
 
 // Location data (Niwot, CO)
 const float LATITUDE = 40.090554;
@@ -62,6 +72,7 @@ bool force_update;
 uint8_t color_r;
 uint8_t color_g;
 uint8_t color_b;
+byte out_msg[OUT_BUF_MAX];
 
 /****************************************************************
  * Setup
@@ -74,10 +85,7 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
   
   // Set up debug serial console
-#if DEBUG
-  Serial.begin(9600);
-  Serial.println("Blynk test");
-#endif
+  Serial.begin(1200);
 
   // Start Blynk and wait for connection
   Blynk.begin(BLYNK_AUTH, WIFI_SSID, WIFI_PSK);
@@ -113,17 +121,8 @@ void loop() {
       doWeather();
       break;
       
-    // Pull in RGB data from Blynk
     case CLOUD_RGB:
-      // Do RGB
-      break;
-      
-    // Disco party!
     case CLOUD_DISCO:
-      // Do Disco
-      break;
-      
-    // Unknown state
     default:
       break;
   }
@@ -136,9 +135,6 @@ void loop() {
 // Callback when weather button is pushed
 BLYNK_WRITE(WEATHER_BTN_PIN) {
   if ( (param.asInt() == 1) && (cloud_state != CLOUD_WEATHER) ) {
-#if DEBUG
-    Serial.println("Switching to WEATHER mode");
-#endif
     cloud_state = CLOUD_WEATHER;
     setLEDs();
     force_update = true;
@@ -148,22 +144,18 @@ BLYNK_WRITE(WEATHER_BTN_PIN) {
 // Callback when RGB button is pushed
 BLYNK_WRITE(RGB_BTN_PIN) {
   if ( (param.asInt() == 1) && (cloud_state != CLOUD_RGB) ) {
-#if DEBUG
-    Serial.println("Switching to RGB mode");
-#endif
     cloud_state = CLOUD_RGB;
     setLEDs();
+    sendRGB();
   }
 }
 
 // Callback when Disco button is pushed
 BLYNK_WRITE(DISCO_BTN_PIN) {
   if ( (param.asInt() == 1) && (cloud_state != CLOUD_DISCO) ) {
-#if DEBUG
-    Serial.println("Switching to DISCO mode");
-#endif
     cloud_state = CLOUD_DISCO;
     setLEDs();
+    sendDisco();
   }
 }
 
@@ -172,15 +164,9 @@ BLYNK_WRITE(ZERGBA_PIN) {
   color_r = param[0].asInt();
   color_g = param[1].asInt();
   color_b = param[2].asInt();
-#if DEBUG
-  Serial.print("Color changed (R,G,B): (");
-  Serial.print(color_r);
-  Serial.print(",");
-  Serial.print(color_g);
-  Serial.print(",");
-  Serial.print(color_b);
-  Serial.println(")");
-#endif
+  if ( cloud_state == CLOUD_RGB ) {
+    sendRGB();
+  }
 }
 
 // Set app LEDs
@@ -212,6 +198,25 @@ void setLEDs() {
 }
 
 /****************************************************************
+ * Send Modes to Pro Mini
+ ***************************************************************/
+
+// Send RGB code with red, green, blue values
+void sendRGB() {
+  out_msg[0] = COMM_RGB;
+  out_msg[1] = color_r;
+  out_msg[2] = color_g;
+  out_msg[3] = color_b;
+  transmitMessage(out_msg, 4);
+}
+
+// Send Disco code
+void sendDisco() {
+  out_msg[0] = COMM_DISCO;
+  transmitMessage(out_msg, 4);
+}
+
+/****************************************************************
  * Weather Functions
  ***************************************************************/
 
@@ -229,77 +234,56 @@ void doWeather() {
     current_weather = getWeather();
   
     // Display weather on clouds
-#if DEBUG
-    Serial.println();
-    Serial.print("Weather: ");
-#endif
     switch ( current_weather ) {
     
       // Cannot get weather data
       case WEATHER_ERROR:
         lcd.print(0, 1, "ERROR");
-#if DEBUG
-        Serial.println("ERROR");
-#endif
         break;
       
       // Clear skies (day)
       case WEATHER_BLUE_SKY:
         lcd.print(0, 1, "BLUE SKY");
-#if DEBUG
-        Serial.println("Blue skies");
-#endif
+        out_msg[0] = COMM_BLUE_SKY;
         break;
       
       // Clear skies (night)
       case WEATHER_NIGHT:
         lcd.print(0, 1, "NIGHT");
-#if DEBUG
-        Serial.println("Starry night");
-#endif
+        out_msg[0] = COMM_NIGHT;
         break;
       
       // Lots of clouds
       case WEATHER_OVERCAST:
         lcd.print(0, 1, "OVERCAST");
-#if DEBUG
-        Serial.println("Overcast");
-#endif
+        out_msg[0] = COMM_OVERCAST;
         break;
       
       // Dawn or dusk
       case WEATHER_GOLDEN:
         lcd.print(0, 1, "GOLDEN");
-#if DEBUG
-        Serial.println("Golden hour");
-#endif
+        out_msg[0] = COMM_GOLDEN;
         break;
       
       // It's snowing!
       case WEATHER_SNOW:
         lcd.print(0, 1, "SNOW");
-#if DEBUG
-        Serial.println("Snow");
-#endif
+        out_msg[0] = COMM_SNOW;
         break;
       
       // Storm
       case WEATHER_LIGHTNING:
         lcd.print(0, 1, "STORM");
-#if DEBUG
-        Serial.println("Stormy");
-#endif
+        out_msg[0] = COMM_LIGHTNING;
         break;
       
       // Unknown weather type
       case WEATHER_UNKNOWN:
       default:
         lcd.print(0, 1, "UNKNOWN");
-#if DEBUG
-        Serial.println("UNKNOWN");
-#endif
         break;
     }
+    transmitMessage(out_msg, 4);
   }
 }
 
@@ -351,9 +335,6 @@ WeatherType getWeather() {
     // Get web page data and push to window buffer
     if ( client.available() ) {
       c = client.read();
-#if DEBUG
-      Serial.print(c);
-#endif
       pushOnBuffer(c, buf, BUFFER_SIZE);
       time = millis();
     }
@@ -401,18 +382,6 @@ WeatherType getWeather() {
         break;
     }
   }
-  
-  // Print our newly found icon and times
-#if DEBUG
-  Serial.print("Icon: ");
-  Serial.println(icon);
-  Serial.print("Time: ");
-  Serial.println(dt, DEC);
-  Serial.print("Sunrise: ");
-  Serial.println(sunrise, DEC);
-  Serial.print("Sunset: ");
-  Serial.println(sunset, DEC);
-#endif
   
   // Make sure we have a legitimate icon and times
   if ( (strcmp(icon, "") == 0) || (dt == 0) || 
@@ -473,4 +442,37 @@ void pushOnBuffer(char c, char *buf, uint8_t len) {
     buf[i] = buf[i + 1];
   }
   buf[len - 1] = c;
+}
+
+/****************************************************************
+ * Transmitter
+ ***************************************************************/
+void transmitMessage(byte msg[], uint8_t len) {
+  
+  int i;
+  byte cs;
+  byte *out_buf;
+  uint8_t buf_size;
+  
+  // If message is greater than max size, only xmit max bytes
+  if ( len > OUT_BUF_MAX ) {
+    len = OUT_BUF_MAX;
+  }
+  
+  // Full buffer is message + SOF, EOF bytes
+  buf_size = len + 2;
+  
+  // Create the output buffer with BEGIN, SOF, CS, and EOF
+  out_buf = (byte*)malloc(buf_size * sizeof(byte));
+  out_buf[0] = SERIAL_SOF;
+  memcpy(out_buf + 1, msg, len);
+  out_buf[buf_size - 1] = SERIAL_EOF;
+  
+  // Transmit buffer
+  for ( i = 0; i < buf_size; i++ ) {
+    Serial.write(out_buf[i]);
+  }
+  
+  // Free some memory
+  free(out_buf);
 }
