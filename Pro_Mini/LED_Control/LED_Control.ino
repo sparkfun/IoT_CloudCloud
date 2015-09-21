@@ -761,6 +761,12 @@ void sunSet(){
 
 // Lightning storm function
 void lightningStorm() {
+
+#if DEBUG
+  Serial.print("Storm: ");
+  Serial.println(storm_state);
+#endif
+  
   //Various types of lightning functions, where the first two 
   //numbers represent the area that the flash could randomly show 
   //up in, the next number is usually how long the flash is (in milisec)
@@ -779,6 +785,7 @@ void lightningStorm() {
         break;
       case 3:
         singleFlash_a(100, 200, 50, 15, strip_a.Color(255,255,255));
+        Serial.println("case 3 - singleFlash");
         break;
       case 4:
         singleFlash_a(100, 200, 50, 15, strip_a.Color(255,255,255));
@@ -912,10 +919,10 @@ void lightningStorm() {
       default:
         break;
     }
+    storm_state = (storm_state + 1) % 47;
+    storm_delay = random(900, 1500);
+    led_time = millis();
   }
-  storm_state = (storm_state + 1) % 47;
-  storm_delay = random(900, 1500);
-  led_time = millis();
 }
 
 /****************************************************************
@@ -926,7 +933,7 @@ void singleFlash_a(int areaMin, int areaMax, int duration, int Size, uint32_t co
   int i;
   int flashStrike = random(areaMin, areaMax);
   for ((i = flashStrike - Size); (i < flashStrike); i++) {
-   strip_a.setPixelColor(i, color);
+   strip_a.setPixelColor(i, 255,255,255);//color);
  }
  strip_a.show();
  delay(duration);
