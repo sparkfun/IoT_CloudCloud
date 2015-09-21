@@ -11,7 +11,8 @@
 #define DEBUG    1
 
 #include <Adafruit_NeoPixel.h>
-#include <SoftwareSerial.h>
+#include <AltSoftSerial.h>
+#include <avr/power.h>
 #include "States.h"
 
 // Pin definitions
@@ -35,12 +36,19 @@ const byte COMM_SNOW = 7;
 const byte COMM_LIGHTNING = 8;
 
 // Global variables
-SoftwareSerial softy(4, 5); // RX, TX
+//SoftwareSerial softy(4, 5); // RX, TX
+AltSoftSerial softy;  // RX = 8, TX = 9, do not use pin 10
 unsigned long led_time;
-Adafruit_NeoPixel strip_a = Adafruit_NeoPixel(300, CLOUD_A_PIN, 
+
+Adafruit_NeoPixel strip_a = Adafruit_NeoPixel(300, CLOUD_A_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip_b = Adafruit_NeoPixel(300, CLOUD_B_PIN, NEO_GRB + NEO_KHZ800);
+
+/*
+Adafruit_NeoPixel strip_b = Adafruit_NeoPixel(300, CLOUD_A_PIN, 
                                         NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel strip_b = Adafruit_NeoPixel(300, CLOUD_B_PIN, 
-                                        NEO_GRB + NEO_KHZ800);
+                                        
+Adafruit_NeoPixel strip_a = Adafruit_NeoPixel(300, CLOUD_B_PIN, 
+                                        NEO_GRB + NEO_KHZ800);*/
 LEDState led_state;
 NightState night_state;
 int night_i;
@@ -66,7 +74,11 @@ void setup() {
 #endif
 
   // Set up software serial
-  softy.begin(1200);
+  softy.begin(9600);
+  
+  // Configure LED pins
+  pinMode(CLOUD_A_PIN, OUTPUT);
+  pinMode(CLOUD_B_PIN, OUTPUT);
 
   // Define initial state
   led_time = millis();
@@ -313,9 +325,9 @@ void disco() {
         green = random(100);
         blue = random(200);
         for (i = 200; i < 300; i++){
-          strip_b.setPixelColor(i, red, green, blue);
+          strip_a.setPixelColor(i, red, green, blue);
         }
-        strip_b.show();
+        strip_a.show();
         break;
   
       case 3:
@@ -323,16 +335,16 @@ void disco() {
         green = random(250);
         blue = random(250);
         for (i = 200; i < 300; i++){
-          strip_b.setPixelColor(i, red, green, blue);
+          strip_a.setPixelColor(i, red, green, blue);
         }
-        strip_b.show();
+        strip_a.show();
         break;
 
       case 4:
         for (i = 0; i < 300; i++){
-          strip_b.setPixelColor(i, 0, 0, 0);
+          strip_a.setPixelColor(i, 0, 0, 0);
         }
-        strip_b.show();
+        strip_a.show();
         break;
 
       case 5:
@@ -374,16 +386,16 @@ void disco() {
         green = random(250);
         blue = random(250);
         for (i = 0; i < 110; i++){
-          strip_b.setPixelColor(i, red, green, blue);
+          strip_a.setPixelColor(i, red, green, blue);
         }
-        strip_b.show();
+        strip_a.show();
         break;
 
       case 10:
         for (i = 0; i < 300; i++){
-          strip_b.setPixelColor(i, 0, 0, 0);
+          strip_a.setPixelColor(i, 0, 0, 0);
         }
-        strip_b.show();
+        strip_a.show();
         break;
   
       case 11:
@@ -408,16 +420,16 @@ void disco() {
         green = random(200);
         blue = random(200);
         for (i = 125; i < 175; i++){
-          strip_b.setPixelColor(i, red, green, blue);
+          strip_a.setPixelColor(i, red, green, blue);
         }
-        strip_b.show();
+        strip_a.show();
         break;
 
       case 14:
         for (i = 0; i < 300; i++){
-          strip_b.setPixelColor(i, 0, 0, 0);
+          strip_a.setPixelColor(i, 0, 0, 0);
         }
-        strip_b.show();
+        strip_a.show();
         break;
   
       case 15:
@@ -459,16 +471,16 @@ void disco() {
         green = random(200);
         blue = random(200);
         for (i = 200; i < 300; i++){
-          strip_b.setPixelColor(i, red, green, blue);
+          strip_a.setPixelColor(i, red, green, blue);
         }
-        strip_b.show();
+        strip_a.show();
         break;
 
       case 20:
         for (i = 0; i < 300; i++){
-          strip_b.setPixelColor(i, 0, 0, 0);
+          strip_a.setPixelColor(i, 0, 0, 0);
         }
-        strip_b.show();
+        strip_a.show();
         break;
 
       case 21:
@@ -510,16 +522,16 @@ void disco() {
         green = random(200);
         blue = random(200);
         for (i = 60; i < 110; i++){
-          strip_b.setPixelColor(i, red, green, blue);
+          strip_a.setPixelColor(i, red, green, blue);
         }
-        strip_b.show();
+        strip_a.show();
         break;
 
       case 26:
         for (i = 0; i < 300; i++){
-          strip_b.setPixelColor(i, 0, 0, 0);
+          strip_a.setPixelColor(i, 0, 0, 0);
         }
-        strip_b.show();
+        strip_a.show();
         break;
 
       case 27:
@@ -544,16 +556,16 @@ void disco() {
         green = random(200);
         blue = random(200);
         for (i = 125; i < 175; i++){
-        strip_b.setPixelColor(i, red, green, blue);
+        strip_a.setPixelColor(i, red, green, blue);
         }
-        strip_b.show();
+        strip_a.show();
         break;
 
       case 30:
         for (i = 0; i < 300; i++){
-          strip_b.setPixelColor(i, 0, 0, 0);
+          strip_a.setPixelColor(i, 0, 0, 0);
         }
-        strip_b.show();
+        strip_a.show();
         break;
 
       default:
@@ -760,22 +772,22 @@ void lightningStorm() {
         jumpingFlash_a(50, 80, 50, strip_a.Color(255,255,255));
         break;
       case 1:
-        jumpingFlash_b(50, 80, 50, strip_b.Color(255,255,255));
+        jumpingFlash_a(50, 80, 50, strip_a.Color(255,255,255));
         break;
       case 2:
         scrollingFlash_a(20, 65, 50, 5, strip_a.Color(255,255,255));
         break;
       case 3:
-        singleFlash_b(100, 200, 50, 15, strip_b.Color(255,255,255));
+        singleFlash_a(100, 200, 50, 15, strip_a.Color(255,255,255));
         break;
       case 4:
-        singleFlash_b(100, 200, 50, 15, strip_b.Color(255,255,255));
+        singleFlash_a(100, 200, 50, 15, strip_a.Color(255,255,255));
         break;
       case 5:
         singleFlash_a(100, 200, 50, 15, strip_a.Color(255,255,255));
         break;
       case 6:
-        scrollingFlash_b(200, 250, 50, 15, strip_b.Color(255,255,255));
+        scrollingFlash_a(200, 250, 50, 15, strip_a.Color(255,255,255));
         break;
       case 7:
         singleFlash_a(50, 100, 50, 5, strip_a.Color(200,200,255));
@@ -784,7 +796,7 @@ void lightningStorm() {
         scrollingFlash_a(200, 250, 50, 15, strip_a.Color(255,255,255));
         break;
       case 9:
-        jumpingFlash_b(100, 130, 50, strip_b.Color(255,255,255));
+        jumpingFlash_a(100, 130, 50, strip_a.Color(255,255,255));
         break;
       case 10:
         jumpingFlash_a(100, 130, 50, strip_a.Color(255,255,255));
@@ -793,10 +805,10 @@ void lightningStorm() {
         multipleFlashs_a(20, 125, 150, 300, 50, 5, strip_a.Color(255,255,255));
         break;
       case 12:
-        flickerFlash_b(50, 300, 50, 25, strip_b.Color(200,200,255));
+        flickerFlash_a(50, 300, 50, 25, strip_a.Color(200,200,255));
         break;
       case 13:
-        multipleFlashs_b(20, 125, 150, 300, 50, 5, strip_b.Color(255,255,255));
+        multipleFlashs_a(20, 125, 150, 300, 50, 5, strip_a.Color(255,255,255));
         break;
       case 14:
         scrollingFlash_a(10, 60, 100, 15, strip_a.Color(225,200,255));
@@ -805,16 +817,16 @@ void lightningStorm() {
         flickerFlash_a(75, 175, 40, 25, strip_a.Color(255,255,255));
         break;
       case 16:
-        flickerFlash_b(75, 175, 40, 25, strip_b.Color(255,255,255));
+        flickerFlash_a(75, 175, 40, 25, strip_a.Color(255,255,255));
         break;
       case 17:
-        flickerFlash_b(75, 175, 40, 25, strip_b.Color(255,255,255));
+        flickerFlash_a(75, 175, 40, 25, strip_a.Color(255,255,255));
         break;
       case 18:
         jumpingFlash_a(200, 130, 50, strip_a.Color(255,255,255));
         break;
       case 19:
-        flickerFlash_b(75, 175, 40, 25, strip_b.Color(255,255,255));
+        flickerFlash_a(75, 175, 40, 25, strip_a.Color(255,255,255));
         break;
       case 20:
         flickerFlash_a(50, 300, 50, 25, strip_a.Color(200,200,255));
@@ -823,7 +835,7 @@ void lightningStorm() {
         scrollingFlash_a(200, 250, 100, 10, strip_a.Color(255,255,255));
         break;
       case 22:
-        wholeCloudFlash_b(40, 100, strip_b.Color(255,255,255));
+        wholeCloudFlash_a(40, 100, strip_a.Color(255,255,255));
         break;
       case 23:
         multipleFlashs_a(20, 125, 175, 300, 50, 5, strip_a.Color(255,255,255));
@@ -832,28 +844,28 @@ void lightningStorm() {
         scrollingFlash_a(20, 65, 50, 3, strip_a.Color(255,255,255));
         break;
       case 25:
-        flickerFlash_b(0, 100, 50, 50, strip_b.Color(200,200,255));
+        flickerFlash_a(0, 100, 50, 50, strip_a.Color(200,200,255));
         break;
       case 26:
-        flickerFlash_b(0, 100, 50, 50, strip_b.Color(200,200,255));
+        flickerFlash_a(0, 100, 50, 50, strip_a.Color(200,200,255));
         break;
       case 27:
         singleFlash_a(75, 175, 40, 3, strip_a.Color(255,255,255));
         break;
       case 28:
-        singleFlash_b(100, 200, 50, 15, strip_b.Color(255,255,255));
+        singleFlash_a(100, 200, 50, 15, strip_a.Color(255,255,255));
         break;
       case 29:
-        scrollingFlash_b(20, 65, 50, 5, strip_b.Color(255,255,255));
+        scrollingFlash_a(20, 65, 50, 5, strip_a.Color(255,255,255));
         break;
       case 30:
-        multipleFlashs_b(20, 125, 200, 300, 50, 5, strip_b.Color(255,255,255));
+        multipleFlashs_a(20, 125, 200, 300, 50, 5, strip_a.Color(255,255,255));
         break;
       case 31:
         singleFlash_a(100, 200, 50, 30, strip_a.Color(255,255,255));
         break;
       case 32:
-        flickerFlash_b(0, 100, 50, 50, strip_b.Color(200,200,255));
+        flickerFlash_a(0, 100, 50, 50, strip_a.Color(200,200,255));
         break;
       case 33:
         scrollingFlash_a(200, 500, 50, 15, strip_a.Color(255,255,255));
@@ -862,19 +874,19 @@ void lightningStorm() {
         jumpingFlash_a(250, 300, 50, strip_a.Color(255,255,255));
         break;
       case 35:
-        jumpingFlash_b(250, 300, 50, strip_b.Color(255,255,255));
+        jumpingFlash_a(250, 300, 50, strip_a.Color(255,255,255));
         break;
       case 36:
         multipleFlashs_a(20, 125, 200, 300, 50, 5, strip_a.Color(255,255,255));
         break;
       case 37:
-        scrollingFlash_b(10, 60, 100, 7, strip_b.Color(225,200,255));
+        scrollingFlash_a(10, 60, 100, 7, strip_a.Color(225,200,255));
         break;
       case 38:
         singleFlash_a(75, 175, 40, 3, strip_a.Color(255,255,255));
         break;
       case 39:
-        singleFlash_b(75, 175, 40, 3, strip_b.Color(255,255,255));
+        singleFlash_a(75, 175, 40, 3, strip_a.Color(255,255,255));
         break;
       case 40:
         jumpingFlash_a(150, 180, 50, strip_a.Color(255,255,255));
@@ -883,13 +895,13 @@ void lightningStorm() {
         jumpingFlash_a(50, 80, 50, strip_a.Color(255,255,255));
         break;
       case 42:
-        scrollingFlash_b(250, 300, 50, 5, strip_b.Color(255,255,255));
+        scrollingFlash_a(250, 300, 50, 5, strip_a.Color(255,255,255));
         break;
       case 43:
         flickerFlash_a(0, 100, 50, 50, strip_a.Color(200,200,255));
         break;
       case 44:
-        scrollingFlash_b(250, 300, 50, 5, strip_b.Color(255,255,255));
+        scrollingFlash_a(250, 300, 50, 5, strip_a.Color(255,255,255));
         break;
       case 45:
         multipleFlashs_a(20, 125, 150, 300, 50, 5, strip_a.Color(200,200,255));

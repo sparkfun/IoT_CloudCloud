@@ -52,7 +52,7 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
 
   // Set up serial
-  Serial.begin(1200);
+  Serial.begin(9600);
 
   // Start Blynk and wait for connection
   Blynk.begin(BLYNK_AUTH, WIFI_SSID, WIFI_PSK);
