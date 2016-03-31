@@ -30,7 +30,7 @@
 // WiFi parameters
 const char WIFI_SSID[] = "sparkfun-guest";
 const char WIFI_PSK[] = "sparkfun6333";
-const char BLYNK_AUTH[] = "b8960ce24e324ce9ade3490034bf6215";
+const char BLYNK_AUTH[] = "fe714a33eaa243848b9a661c76499d09";
 
 // Other constants
 const byte SERIAL_SOF = 0xA5;
@@ -322,6 +322,8 @@ WeatherType getWeather() {
   cmd += String(LATITUDE);
   cmd += "&lon=";
   cmd += String(LONGITUDE);
+  cmd += "&appid=677a825ac1f8b2b0ae519a69fbb09e92";  
+  //This is my personal API, you can get your own at https://home.openweathermap.org/users/sign_up
   cmd += " HTTP/1.1\nHost: ";
   cmd += http_site;
   cmd += "\nConnection: close\n\n";
