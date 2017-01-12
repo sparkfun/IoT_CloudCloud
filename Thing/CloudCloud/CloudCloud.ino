@@ -67,7 +67,7 @@ WidgetLCD lcd(LCD_PIN);
 CloudState cloud_state;
 WiFiClient client;
 WeatherType current_weather;
-unsigned long time;
+unsigned long timestamp;
 bool force_update;
 uint8_t color_r;
 uint8_t color_g;
@@ -99,7 +99,7 @@ void setup() {
   // Define initial state
   cloud_state = CLOUD_WEATHER;
   setLEDs();
-  time = millis();
+  timestamp = millis();
   force_update == false;
   color_r = 0;
   color_g = 0;
@@ -224,9 +224,9 @@ void sendDisco() {
 void doWeather() {
   
   // Only update every 30 seconds
-  if ( ((millis() - time) >= 30000) || force_update ) {
+  if ( ((millis() - timestamp) >= 30000) || force_update ) {
     force_update = false;
-    time = millis();
+    timestamp = millis();
     lcd.clear();
     lcd.print(0, 0, "WEATHER");
     
