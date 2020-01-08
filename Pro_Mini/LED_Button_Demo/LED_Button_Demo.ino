@@ -33,7 +33,7 @@ int i = 0;
 
 void setup() {
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-  attachInterrupt(1, change, RISING);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), change, RISING);
   // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
 #if defined (__AVR_ATtiny85__)
   if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
@@ -71,9 +71,9 @@ void startShow(int L) {
             break;
     case 3: clearCloud();
             theaterChase(strip_a.Color(127, 127, 127), 100); 
-            // Function that makes a white theatre crawl type lighting siduation
+            // Function that makes a white theatre crawl type lighting simulation
             break;
-    case 4: rainbow(20);  // Function that slowly scrolls ranbows actross the clouds
+    case 4: rainbow(20);  // Function that slowly scrolls rainbows across the clouds
             break;
     case 5: sunSet();    // Function that sets the clouds red/orange/yellow
             break;
@@ -150,7 +150,7 @@ void theaterChase(uint32_t c, uint8_t wait) {
 }
 
 // Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
+// The colors are a transition r - g - b - back to r.
 uint32_t Wheel(byte WheelPos) {
   WheelPos = 255 - WheelPos;
     if(WheelPos < 85) {
@@ -185,7 +185,7 @@ void whiteClouds(){
 }
 
 
-//Overcast funtion:
+//Overcast function:
 void overcast(){
     if(reset != 1){
       for(i=0; i<300; i++) {   //for all of the LEDs 
@@ -232,7 +232,7 @@ void nighttime(int twinkle){
 
 
 
-//Sun set function:
+//Sunset function:
 void sunSet(){
     if(reset != 1){
         for(i=0; i<100; i++) {   //for the first 100 LEDs
