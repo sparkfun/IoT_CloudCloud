@@ -1,14 +1,6 @@
 #ifndef STATES_H
 #define STATES_H
 
-// Cloud states
-typedef enum {
-  CLOUD_WEATHER,
-  CLOUD_RGB,
-  CLOUD_DISCO,
-  CLOUD_DEMO
-} CloudState;
-
 // Weather definitions
 typedef enum {
   WEATHER_ERROR,
